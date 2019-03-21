@@ -1,0 +1,12 @@
+This paper introduces MapReduce, which is a programming model for parallel processing and generating large data sets.
+
+The input data of computations within Google is usually very large, forcing the programmer to distribute the tasks across lots of machines. The problem is: how to build a distributed computation framework that can process large data sets in parallel and handle fault tolerance? 
+
+MapReduce requires two steps: Map and Reduce(both are very short and written by the user). The Map function parallels process a large number of input pars and produces a set of intermediate key/value pairs. The Reduce function will merge intermediate values by partitioning keys(e.g., use consistent hashing). One of the copies of the program is unique. It is the master. The master is responsible for scheduling the map, and the reduce tasks, keeping track of the location of the data and detecting failures. 
+
+
+Note:
+1. For the users, they only need to write a Map function and a Reduce function. They don't need to understand parallelism and distributed programming.
+2. No reduce starts before all maps are finished because if there exists at least one map task running, it's possible that it will generate some key/value pairs, but the reduce job for that key has already been processed.
+3. Each map/reduce task is independent of each other(No communication required between map task or reduce task)
+4. The input data of the map function comes from the distributed file system(e.g., GFS or HDFS), and the output of the map function is written into the local disk of the node. The reducer will read the data from the mappers' disk and write the output back to the distributed file system.
