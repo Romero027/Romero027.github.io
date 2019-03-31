@@ -5,3 +5,4 @@ The big difference between Bayou and other storage system is that there are two 
 Drawbacks:
 1.Because Bayou provides the ability to redo updates, it’s tough to do garbage collection. 2.Because the client only needs to do reads and writes from one replica without coordination with other replicas, some updates may not survive server failures. 
 Finally, although both Bayou and Dynamo implement an anti-entropy protocol to achieve eventual consistency, I think Dynamo’s Merkle tree-based anti-entropy protocol is more efficient. Merkle Tree based protocol reduces the amount of data needed to pass around and relies on the actual data instead of timestamps.
+3. It only supports single data center but does not works well in geo-distributed data centers.

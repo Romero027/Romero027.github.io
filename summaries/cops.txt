@@ -1,0 +1,21 @@
+This paper is motivated by the problem of how to build ALPS systems which provide the strongest, achievable consistency[1]. In other words, the authors are trying to develop a system that achieves both ALPS  and causal consistency with convergent conflict handling.[2]. 
+There are lots of existing systems, but none of them are satisfying. Amazon's Dynamo[3] only provides eventual consistency to achieve ALPS properties. Bayou is probably the closest work, but it does not scale well and only works within a single datacenter. 
+First, we need to understand what is causal consistency with convergent conflict handling(see section 3 of the paper). Causal consistency means the value returned from the get operation must be consistent with the order defined by causality(i.e. "it must appear the operation that writes a value occurs after all operations that causally precede it). However, causal consistency does not order concurrent operations and concurrent operations on the same key result in a conflict. [4] Thus, we want convergent conflict handling: all conflicting operations must be handled in the same manner at all replicas.[5].  To summarize, causal+ consistency ensures client sees causally-correct, conflict-free, and always-progressing data store. 
+There are two main abstractions in COPS: 1)versions and 2)dependencies. COPS guarantees that each replica in COPS always returns non-decreasing versions of a key and replicas write a version only after writing all of its dependencies. 
+One key design of COPS is that the local cluster is set up as a linearizable key-value store[6]  and replication between COPS clusters happens asynchronously. Within data centers, COPS adopts consistent hashing and chain replication. After a write completes locally, the primary node of a key places it in a replication queue, from which it is sent asynchronously to remote nodes.
+Finally, the authors present an extended version of COPS, which also supports get transactions. [7]
+
+Strength: 
+I think this is a very importent paper as it presents a causally-correct system which provides a much stronger guarantee than eventual consistent systems. It also formally defines the crucial properties of distributed data stores(ALPS) as well as causal consistency.
+
+Weakness: 
+I found this paper somewhat hard to understand as the author describe the COPS and COPS_GT together, but this is a great paper overall.
+
+[1]. ALPS means 1)Availability: All operations issued to the data store are completed successfully. 2) Low latency: the operations complete "quickly"(nice to have an average performance of a few milliseconds and worst-case performance(i.e., 99.9th) of 10s or 100s of milliseconds) 3) partition tolerance: the data store continues to operate under network partitions. (in the paper, the authors argue that network partition only occurs across datacenters 4) High scalability: The data store scales out linearly.  We know that under CAP theroem, we cannot achieve both ALPS and strong consistency(i.e., linearizability).  
+[2] causal consistency is the strongest achievable consistency model under CAP theorem.
+[3]such systems also include Linkedin's Voldemort and Facebook's Cassandra.
+[4] concurrent operations mean that for operations a and b, a does not happen before b , and b does not happen before a.) If they operate on the same key, replicas may diverge forever. 
+[5]Common ways to handle conflicts are 1) last-writer-win 2) application specific means. 
+[6]Because we expect very low latency and no partitions within a cluster. 
+[7]Recall that transaction is a group of operations that should occur together or not at all. Get transaction gives clients a consistent view of multiple keys.
+
