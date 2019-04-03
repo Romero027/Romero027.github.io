@@ -37,7 +37,7 @@ for jString in successTestCases:
 
 for key in keys:
     for val in values:
-        randJson = {key[0]: val}
+        randJson = {key[0].join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)]): val}
         j = json.dumps(randJson)
         child = subprocess.Popen("./jsonParser", stdin=subprocess.PIPE, stderr=subprocess.PIPE)
         _, stdErrOut = child.communicate(input = j)
