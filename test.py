@@ -34,17 +34,17 @@ for jString in successTestCases:
 
 # print(keys)
 # print(values)
-
-for key in keys:
-    for val in values:
-        randJson = {key[0].join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)]): val}
-        j = json.dumps(randJson)
-        child = subprocess.Popen("./jsonParser", stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-        _, stdErrOut = child.communicate(input = j)
-        if child.returncode != 0 or stdErrOut != "" :
-            print "BROKEN SUCCESS TEST CASE (%d): %s" % (child.returncode, j)
-            print "|%s|" % stdErrOut
-            sys.exit(0)
+for i in range(0, 10000):
+    for key in keys:
+        for val in values:
+            randJson = {key[0].join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)]): val}
+            j = json.dumps(randJson)
+            child = subprocess.Popen("./jsonParser", stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+            _, stdErrOut = child.communicate(input = j)
+            if child.returncode != 0 or stdErrOut != "" :
+                print "BROKEN SUCCESS TEST CASE (%d): %s" % (child.returncode, j)
+                print "|%s|" % stdErrOut
+                sys.exit(0)
 
 #l = [chr(i) for i in xrange(127)]
 
