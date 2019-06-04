@@ -1,0 +1,15 @@
+The paper was inspired by the problem that people often spend a lot of time trying to understand the systems so that they can tune them for better performance.[1] The authors argue that simplify reasoning about performance enable users to determine what configuration parameters to set and what hardware to use to optimize runtime. 
+
+The main objective of this paper is to explore how systems can provide performance clarity, and as a result it does not focus on optimizing performance. To help users better understand the system, the authors propose breaking jobs into monotasks: unit of work that each use a single resource.[2] Monotasks do not interact with or block on other monotasks during their execution. Per-resource schedulers control contention and have complete control over resources. In MonoSpark, the decomposition of jobs into monotasks is performed on worker machines rather than by the central job scheduler. 
+
+Explicitly separating the use of different resources into monotasks allows each job to report the time spent using each resource. These times can be used to construct a simple modelfor the job’s completion time. We could predict the runtime on different hardware.[3] , with deserialized dat[4] or even with both hardware and software changes. It could also be used for understanding bottlenecks.[5]
+
+
+
+[1]Questions like What hardware should I run? Why did my workload run so slowly? Etc.
+[2]Monotasks use exactly one of CPU, disk, or network. 
+[3]e.g. . For example, to compute how much more quickly a job would complete if the job had twice as much disk throughput available, the ideal disk time would be divided by two, and the new modeled job completion time would be the new maximum time for any of the resources.  
+[4]e.g. to estimate the improvement in runtime if input data were stored in-memory and deserialized, rather than serialized on disk. See 6.3 for details.
+[5]The authors conclude that for the big data benchmark, CPU is the bottleneck for most queries, improving disk speed could reduce runtime of some queries, and improving network speed has little effect
+
+See Also:https://people.eecs.berkeley.edu/~apanda/assets/papers/tiny-tasks.pdf
