@@ -4,6 +4,9 @@ The input data of computations within Google is usually very large, forcing the 
 
 MapReduce requires two steps: Map and Reduce(both are very short and written by the user). The Map function parallels process a large number of input pars and produces a set of intermediate key/value pairs. The Reduce function will merge intermediate values by partitioning keys(e.g., use consistent hashing). One of the copies of the program is unique. It is the master. The master is responsible for scheduling the map, and the reduce tasks, keeping track of the location of the data and detecting failures. 
 
+Fault-tolerance and handling straggles:
+
+
 
 Note:
 1. For the users, they only need to write a Map function and a Reduce function. They don't need to understand parallelism and distributed programming.
