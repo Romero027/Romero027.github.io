@@ -18,7 +18,7 @@ Some final notes:
 - Paxos may violate the FIFO client property. 
 - As you add ZooKeeper Servers, the read throughput improves, but the write throughput degrades. This is because atomic broadcast needs to be done via Zab.(a write operation requires the agreement of (in general) at least half the nodes in an ensemble). Thus, Zookeeper scales well with increase in read operations, but does not with increase write operations. To alleviate this, observer replicas are used. Observers are non-voting members of an ensemble which only hear the results of votes, not the agreement protocol that leads up to them.[8]
 
-
+Zookeeper is used for discovery, resource allocation, leader election and high priority notifications.  
 
 
 
