@@ -1,15 +1,37 @@
-This paper introduces MapReduce, which is a programming model for parallel processing and generating large data sets.
+  This paper introduces MapReduce, which is a programming model for parallel processing and generating large data sets.
+ 
+ 
+  The input data of computations within Google is usually very large, forcing the programmer to distribute the tasks across lots of machines. The problem is: how to build a distributed computation framework that can process large data sets in parallel and handle fault tolerance? 
 
-The input data of computations within Google is usually very large, forcing the programmer to distribute the tasks across lots of machines. The problem is: how to build a distributed computation framework that can process large data sets in parallel and handle fault tolerance? 
 
-MapReduce requires two steps: Map and Reduce(both are very short and written by the user). The Map function parallels process a large number of input pars and produces a set of intermediate key/value pairs. The Reduce function will merge intermediate values by partitioning keys(e.g., use consistent hashing). One of the copies of the program is unique. It is the master. The master is responsible for scheduling the map, and the reduce tasks, keeping track of the location of the data and detecting failures. 
+  Image there is a client invokes MapReduce and supplies the map/reduce function, the client is going to connect to one of the machine in the cluster and that machine is going to be the special machine, the so-called master process. 
 
-Fault-tolerance and handling straggles:
 
+  Any machine can play any role, just like in Paxos, the master is going to make a decision to split up the input of the job.  The master are going to make the assumption that the input docs is already out there on the machines(In Google, there is a system called GFS, that spreads document randonly around macines, make sure there is at least three copies of each doc, far away from each other to protect against power failures.) The master is first going to make an attempt that for each doc, it's going to schedule a worker machine that process the doc, and make the attempt to schedule that work on machine that the doc is already located. (moving computation is cheaper than moving data). This may not alwasy be possible, because the docs may be placed in a skewed fashion. Imagine a pessimistic senrio where all our document are on machine A, it doesn't make sense to respect locality, it make sense to move docs to other places so we get more parallelism. (moving data have cost). So the master schedules the task as close as we can, while alse maximum our parallel resource. A multi-level opt problem in some sense the scheduler has to deal with.(See delay scheduling paper)
+
+
+  The map tasks have the nice property that they are embarrassingly parallel. The intermediate result are write out to local disks. (The scheduler is going to track the process of these map task, which ask them to periodically phone home and say how they are doing. 
+
+
+ After the map phase is finished, the Master is going to talk to the reducers and say hey, there is work to do(The decision is going to be made via a hash function mod k about which keys go to which reducer) and reducer is going to ask the data from the mappers and process them. The communication pattern is all to all. This is called the shuffle phase. This is not an ideal communication pattern, but they can't be avoided. 
+
+Fault tolerance: 
+  what could go wrong is the problem we should ask when we program distributed systems, because anything could go wrong, will.
+
+  1.Master failure: The google author say totally probably won't happen. (so, it's just pretend for a min, that the master doesn't fail
+  2.mapper failure: the master knows what documents are where, we are going to ask each worker periodically phone home to report their progress. If a worker hasn't been phone home for a sufficient long amount of time, the master could decide that worker is never coming back. Thus, the master can reschedule the task in other workers. But of course, what if the process that you decided was never going to come back indeed does come back, is that a problem? Because of the way the master structure the map functions, because it's pure functional. you could also just ignore the problem, because the two copy of the tasks are going to compute the same result, so the master can just forget about the fact it ask two people to do it and whoever finish the last, they are overwriting the same thing the other guy writing. 
+  3.reducer failure: same thing. they can just go back and read the code data on disk of mappers. (The mappers, once their result are written to disk, it's sort of checkpoint barrier here.) 
+  4.Stagglers(e.g. bad disk, bad nic card): Stagglers are machines that takes an unusually long time to complete. When a MapReduce operation is close to completion, the master schedules backup executions of the remaining in-progress tasks. The task is marked as completed whenever either the primary or the backup execution completes
 
 
 Note:
-1. For the users, they only need to write a Map function and a Reduce function. They don't need to understand parallelism and distributed programming.
-2. No reduce starts before all maps are finished because if there exists at least one map task running, it's possible that it will generate some key/value pairs, but the reduce job for that key has already been processed.
-3. Each map/reduce task is independent of each other(No communication required between map task or reduce task)
-4. The input data of the map function comes from the distributed file system(e.g., GFS or HDFS), and the output of the map function is written into the local disk of the node. The reducer will read the data from the mappers' disk and write the output back to the distributed file system.
+  1. For the users, they only need to write a Map function and a Reduce function. They don't need to understand parallelism and distributed programming.
+  2. No reduce starts before all maps are finished because if there exists at least one map task running, it's possible that it will generate some key/value pairs, but the reduce job for that key has already been processed.
+  3. Each map/reduce task is independent of each other(No communication required between map task or reduce task)
+  4. The input data of the map function comes from the distributed file system(e.g., GFS or HDFS), and the output of the map function is written into the local disk of the node. The reducer will read the data from the mappers' disk and write the output back to the distributed file system.
+  
+Some Applications of Mapreduce:
+  Distributed grep: Let's say I'm trying to grep for some term, the term will be passed in map function, where the whole map function will be kinda hard coded for the term. So, the map function will just say, for every Y in the document, emit(print) the line, if it has the word in it, otherwise, don't. what does the reduce function do? Nothing! coz we already emit the line.
+
+  Inverted index(search engines): I want to produce a report saying that, instead of saying the word (banana) and how many times it occurred. I want to find the documents it occurred in, which is a list of url, because later I'm going to use this to build my search engine. The way I'm going to build my search engine is that I'm going to have a term vector, for example: Apple occurred in url 2 3 4 Banana occurred in url url 4 9 10. If someone wants to search for the phrase the Apple Banana, what do I do? I'll look up all the terms and I'll take the intersection of their matching document. in the earlier days of internet, this is exactly how it works. So, this will be a way of saying I have these document spread everywhere, but they are not searchable, I have to send queries to all the servers. To make them searchable, we can transform them into so-called inverted index and the inverted index, which I computed using MapReduce, can be use to index back to the docs. 
+  Inverted index(vacuuming): 
