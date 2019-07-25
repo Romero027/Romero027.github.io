@@ -1,8 +1,14 @@
-Recent work showed that centrally aggregating and analyzing data could be slow and, sometimes, even not possible due to data sovereignty issues[1]. Thus, Geo-distributed analytics are becoming more ubiquitous nowadays. However, existing query optimizers[2] ignore the underlying heterogeneous network, because they were designed for single server setup. Multiple queries could contend simultaneously for limited WAN bandwidth. QOs for GDA must consider 1) task placement and network transfer scheduling when determining a QEP's quality, and 2) plan for queries at once.[3] 
-Clarinet lies between the existing Hive/Spark QO and the execution framework as an intermediate shim layer. Clarinet collects the QEP-Sets from multiple queries/QOs, and computes a single, optimal QEP per query. For a single query, Clarinet will choose one QEP from the query's QEP-set, such that its running time is minimized. For multiple contending queries, 
+  Recent work showed that centrally aggregating and analyzing data could be slow and, sometimes, even not possible due to data sovereignty issues[1]. Thus, Geo-distributed analytics are becoming more ubiquitous nowadays. However, existing query optimizers[2] ignore the underlying heterogeneous network, because they were designed for single server setup. Multiple queries could contend simultaneously for limited WAN bandwidth. QOs for GDA must consider 1) task placement and network transfer scheduling when determining a QEP's quality, and 2) plan for queries at once.[3] 
+  
+  
+  Clarinet lies between the existing Hive/Spark QO and the execution framework as an intermediate shim layer. Clarinet collects the QEP-Sets from multiple queries/QOs, and computes a single, optimal QEP per query. For a single query, Clarinet will choose one QEP from the query's QEP-set, such that its running time is minimized. For multiple contending queries, 
 if we pick the optimal QEPs independently, they may contend for network resources. The strawman solution is to emulate shortest-job first and iteratively determines the QEP, placement, and schedule from the set of all QEPs of all jobs. However, it may lead to resource fragmentation. The authors present a novel approach: k-Shortest Jobs First Heuristic. Clarinet will maintain a dynamic set, D, consisting of k-shortest queries. Whenever a flow belonging to a query in D is available, and the resource it needs is free, Clarinet will immediately schedule the flow on the resource[5].
+
+
 Comment:
-The overall idea is great, and it works for all QOs that can provide multiple QEPs based on its current cost model. However, it seems that how to choose k in the k-shortest jobs first heuristic is not adequately discussed.
+   The overall idea is great, and it works for all QOs that can provide multiple QEPs based on its current cost model. However, it seems that how to choose k in the k-shortest jobs first heuristic is not adequately discussed.
+
+
 [1] e.g. German BDSG data protection act
 [2] The query optimizer(QO) takes users' input query/script and determines an optimal execution plan, which is essentially a DAG of many interdependent tasks. 
 [3]Jointly determining the QEP for all queries provides better opportunities to avoid resource contention.
