@@ -13,7 +13,7 @@
  BigTable provides an API to application developers that allows the typical operations you might expect; creation and deletion of tables and column families, writing data and deleting columns from a row. Transactions are supported at the row level, but not across several row keys (just like PNUTS). However, write batching is implemented to improve throughput.
 
 
- BigTable is built on top of GFS. Bigtable data is stored in the SSTable file format. An SSTable provides a persistent ordered immutable map from keys to values, where both keys and values are arbitrary byte strings. The other service BigTable uses is Chubby, the highly available, reliable distributed lock service. Chubby is used to ensure that there is at most one active master at any time.
+ BigTable is built on top of GFS, Chubby lock service[2] and SSTable. Bigtable data is stored in the SSTable file format. An SSTable provides a persistent ordered immutable map from keys to values, where both keys and values are arbitrary byte strings. 
 
 
  BigTables are split into lexicographically ordered(by row key) chunks called tablets. BigTable tablet servers each maintain responsibility for a number of tablets. We don't need to explicitly replicate tablet servers because every update to a tablet is reflected in GFS. Tablet servers keep the most recent updates to a tablet in an in-memory representation called a memtable. 
@@ -32,6 +32,8 @@ Lesson Learned:
 
 RE
 [1] "Multi-dimensional refers to the fact that the index used to lookup data may be comprised of several dimensions. A simple key->value lookup is one-dimensional. (row, column)->value is two-dimensional. BigTables may be multi-dimensional as the index maps from (row, column, time, column qualifier) onto a value. In particular the idea that you can index values by time is novel - so you can retrieve the previous versions of a value by timestamp if you like. This implies that no data are ever deleted from a BigTable, and this is indeed the case. Once a value is written, it’s written for life, uniquely identified by its timestamp. Well - almost. Applications may specify to BigTable that only the most recent nn or only versions that were written recently should be kept, and BigTable is free to garbage collect those that are not."
+[2] BigTable uses Chubby for a variety of tasks: 1. To ensure there is at most one active master at any time. 2. To store the bootstrap location of BigTable data(root tablet). 3. To discover BigTable servers and finalize tablet server death. 4. To store ACLs. Thus, Chubby unavailable = BigTable unavailable.
+
 
 Reference: 
 https://www.the-paper-trail.org/post/2008-10-29-bigtable-googles-distributed-data-store/
