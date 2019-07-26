@@ -1,22 +1,26 @@
-In this paper, the author introduces Paxos, which is a fault-tolerant algorithm used to reach consensus among a collection of computers in asynchronous and non-Byzantine model. 
-The problem of consensus is to get a collection of computers to decide a thing as if they were one computer. The main difference between consensus and other agreement problems is that consensus protocols need to be fault tolerant, which means there is no single point of failure. In contrast, in protocols like 2Phase commit, if the coordinator were to crash, the whole system might not able to make any progress. If there is a stable leader, consensus becomes trivial, because the leader can establish a total order over all operations itself and have other nodes follow it. However, the failure of the leader will prevent the system from making any progress. Moreover, if the leader election algorithm fails(which is likely to happen in case of network partition), there might exist multiple leaders and violates agreement property. 
-The paper defines three classes of agents: 1.Proposers(nodes that propose value) 2.Acceptors(remember the proposed values) 3.Learners(discover the chosen values). 
-Then, it describes the following failed attempts to solve consensus:
-1.Single acceptor agent(act as a leader). 
-Unsatisfactory because of the single point of failure.
-2.Multiple acceptor agents. 
--acceptors accept the first value they receive
--a value is chosen if it is accepted by a majority acceptors 
-Unsatisfactory because we can easily construct cases in which no value is accepted by a majority of accepts, violating termination. 
-3. Accept more than one values
-Unsatisfactory because the message may be delivered out of order, violating agreement. 
-Paxos Algorithm:
-Prepare Phase:
-For proposer, it selects a new proposal number n and broadcast a prepare request(includes n) to acceptors. 
+  In this paper, the author introduces Paxos, which is a fault-tolerant algorithm used to reach consensus among a collection of computers in asynchronous and non-Byzantine model. 
+  
+  The problem of consensus is to get a collection of computers to decide a thing as if they were one computer. The main difference between consensus and other agreement problems is that consensus protocols need to be fault tolerant, which means there is no single point of failure. In contrast, in protocols like 2Phase commit, if the coordinator were to crash, the whole system might not able to make any progress. If there is a stable leader, consensus becomes trivial, because the leader can establish a total order over all operations itself and have other nodes follow it. However, the failure of the leader will prevent the system from making any progress. Moreover, if the leader election algorithm fails(which is likely to happen in case of network partition), there might exist multiple leaders and violates agreement property. 
+  
+  The paper defines three classes of agents: 1.Proposers(nodes that propose value) 2.Acceptors(remember the proposed values) 3.Learners(discover the chosen values). 
+  Then, it describes the following failed attempts to solve consensus:
+    1.Single acceptor agent(act as a leader). 
+        Unsatisfactory because of the single point of failure.
+    2.Multiple acceptor agents. 
+        -acceptors accept the first value they receive
+        -a value is chosen if it is accepted by a majority acceptors 
+        Unsatisfactory because we can easily construct cases in which no value is accepted by a majority of accepts, violating        termination. 
+    3. Accept more than one values
+      Unsatisfactory because the message may be delivered out of order, violating agreement. 
+
+
+    Paxos Algorithm:
+      Prepare Phase:
+        For proposer, it selects a new proposal number n and broadcast a prepare request(includes n) to acceptors. 
 For acceptor, it compares n with the accepted proposal with the highest number. If n is greater, the acceptor sends back a promise to follow that proposer and the highest numbered proposal(and the value associated with the proposal) it has accepted, if any. 
-Accept Phase:
-After the proposer receives responses from a majority of acceptors, the proposer will send an accept request to all acceptors. The accept message contains the proposal number and a value(the value of the highest numbered proposal or any value if all acceptors respond none)
-When an acceptor receives an accept request, it will accept the request if the proposal number is greater than or equal to the highest numbered proposal it has accepted.
+    Accept Phase:
+      After the proposer receives responses from a majority of acceptors, the proposer will send an accept request to all acceptors. The accept message contains the proposal number and a value(the value of the highest numbered proposal or any value if all acceptors respond none)
+      When an acceptor receives an accept request, it will accept the request if the proposal number is greater than or equal to the highest numbered proposal it has accepted.
 Finally, if an accept request is accepted by a majority of acceptors. The proposal is chosen(or decided). 
 
 
