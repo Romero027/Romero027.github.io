@@ -1,1 +1,3 @@
 TL;DR: The author proposes a strategy allows the database to continue to provide availability during a partition, and enforce consistency once the partition is resolved.
+
+Recapping
