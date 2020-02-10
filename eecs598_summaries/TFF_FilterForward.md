@@ -68,9 +68,7 @@ However, the paper does not provide any theoretical convergence guarantee and th
 Federated Learning protocol is very similar to the traditional parameter server protocol. The main differences are: 
 
 * In data center setting, shared storage is usually used, which means the worker machine do not keep persistent data storage on their own, and they fetch data from the shared storage at the beginning of each iteration.
-
 * In FL, the data, and thus the loss function, on the different clients may be very heterogeneous, and far from being representative of the joint data.(e.g. the data stored on each client may be highly non-IID)
-
 * In FL, the server never keeps track of any individual client information and only uses aggregates to ensure privacy.
  Because of the high churn in FL setting, only a small subset of the devices are selected by the server in each round.
  
@@ -81,3 +79,10 @@ In general, FL is most appropriate when:
 * On-device data is more relevant than server-side proxy data
 * On-device data is privacy sensitive or large 
 * Labels can be inferred naturally from user interaction
+
+## Advantages
+
+* Highly efficient use of network bandwidth
+... * Less information is required to be transmitted to the cloud.
+* Privacy
+... * As described above, the raw data of users need not be sent to the cloud. With guaranteed privacy, more users will be willing to take part in collaborative model training and so, better inference models are built.
