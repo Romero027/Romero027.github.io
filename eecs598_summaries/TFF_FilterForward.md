@@ -82,7 +82,10 @@ In general, FL is most appropriate when:
 
 ## Advantages
 
-* Highly efficient use of network bandwidth
-...* Less information is required to be transmitted to the cloud.
-* Privacy
-...* As described above, the raw data of users need not be sent to the cloud. With guaranteed privacy, more users will be willing to take part in collaborative model training and so, better inference models are built.
+* Highly efficient use of network bandwidth: Less information is required to be transmitted to the cloud.
+* Privacy: As described above, the raw data of users need not be sent to the cloud. With guaranteed privacy, more users will be willing to take part in collaborative model training and so, better inference models are built.
+
+## Challenges and Limitations
+
+* Does it work? And if so, why? 
+...We can prove FL works for linear models and a couple of other special cases, but we cannot prove it works for more complicated things like neural networks unless we train the model in a non-federated way and demonstrate that it gets almost the same performance. 
