@@ -1,72 +1,128 @@
-# Summary of "Flat Datacenter Storage"
-Xiangfeng Zhu(zxfeng)
+# Summary of "Towards Federated Learning at Scale: System Design"
+Xiangfeng Zhu(zxfeng), Jiachen Liu(amberljc), Chris Chen(zhezheng)
 
 ## Problem and Motivation
 
-#### Oversubscription
-Switch ports and cabling have both monetary cost and an operational cost in data centers. Imagine you have to wire thousands of machines together. How would you do it? 
+The goal is to build a system that can train a deep neural network on data stored on the phone which will never leave the device. The weights are combine in the cloud with Federated Averaging, constructing a global model which is pushed back to the phone for inference.
 
-The following figure shows the dominant design pattern for data-center architecture today(2012). 
-
-<p align="center">
-    <img src="http://xzhu27.me/fds/clos.png" alt="image"/>
-</p>
-
-As shown in the above figure, the network is a tree-like hierarchy reaching from a layer of servers in racks at the bottom to a layer of core routers at the top. Orange rectangles represent switches. Unfortunately, this conventional design suffers from a fundamental limitation: **Limited server-to-server capacity(i.e., oversubscription).**
-
-As we go up the hierarchy, we are confronted with steep technical and financial barriers in sustaining high bandwidth. Thus, as traffic moves up through the layers of switches and routers, the over-subscription ratio increases rapidly. Top-level switches can be oversubscribed by up to 240x(according to the VL2 paper), meaning that only one in 240 machines can send data across the top level to the other side at a time. 
-
-The [VL2 paper](http://web.eecs.umich.edu/~mosharaf/Readings/VL2.pdf) provides a more detailed explanation. 
-
-#### Disk Locality
-The conventional wisdom in big-data processing systems(e.g., MapReduce) is to move computation to the data(i.e., respect data locality) because of the problem of oversubscription. Although there are some works(e.g., [Delay Scheduling](http://elmeleegy.com/khaled/papers/delay_scheduling.pdf)) attempted to solve this issue, location-awareness adds complexity to the scheduler. 
-
-
-#### CLOS network 
-However, recently developed [CLOS networks](http://web.eecs.umich.edu/~mosharaf/Readings/VL2.pdf) have made it economical to build non-oversubscribed full bisection bandwidth networks at the scale of a datacenter. 
-The main consequence is that there is no distinction between local disk and remote disk, since the network bandwidth is roughly equal to the network bandwidth. (However, note that memory bandwidth is still two orders of magnitude than the disk and network bandwidth). Thus, we can have much simpler work schedulers and programming models. 
-Another consequence of such design is that high disk-to-disk bandwidth can also facilitate fast recovery from disk and machine failures. 
 
 ## Solution Overview
 
-In FDS, data is logically stored in **blobs**, which is a byte sequence named with a 128-bit GUID. Reads from and writes to a blob are done in units called **tracts**. Empirically, they found that 8MB makes random and sequential access achieves nearly the same throughput. Every disk is managed by a process called a **tract server** that services read and write requests that arrive over the network from clients. FDS uses a **metadata server** to store the location of tracts.
-
 <p align="center">
-    <img src="http://xzhu27.me/fds/architecture.png" alt="image"/>
+    <img src="http://xzhu27.me/eecs598_summaries/protocol.png" alt="image"/>
 </p>
 
-#### Metadata Management
+#### Device-server protocol
+
+Each round of the protocol contains three phases. 
+
+1. **Selection**: The server(i.e. the coordinator in the server) picks a subset of available devices to work on a specific FL task. 
+
+2. **Configuration**: The server sends the FL plan(execution plan) and the FL checkpoint(i.e. a serialized state of a Tensorflow session) with the global model to each of the chosen devices. When receiving a FL task, the FL runtime will be responsible for performing local training.
+
+3. **Reporting**: The server waits for the participating devices to report updates. The round is considered successful if enough devices report in time. (The update to the model is often sent to the server using encrypted communication.)
+
+As an analogy, we can interpret the FL server as the reducer, and FL devices as mappers. 
 
 <p align="center">
-    <img src="http://xzhu27.me/fds/table.png" alt="image"/>
+    <img src="http://xzhu27.me/eecs598_summaries/device.png" alt="image"/>
 </p>
 
-FDS uses a metadata server to store the information about data placement, but it only stores the tract locator table(TLT). Each TLT entry, with k-way replication, contains k tractservers. The client applies the following function to get entries in TLT, called **tract locator**. Once clients find the proper tractserver address in the TLT, they send read and write requests containing the blob GUID, tract number. 
+#### Device
+
+The device should maintain a repository of locally collected data for model training and evaluation. Applications are responsible for making their data available to the FL runtime as an example store(e.g. an SQLite database recording action suggestions show to the user and whether or not these suggestions were accepted). When a task arrived at the device, the FL runtime will access an appropriate example store to compute model updates.
+
+Two things to note here:  1. We need to avoid any negative impact on the user experience. Thus, the FL runtime will only start the task when the phone is idle, connected to the WiFi/power etc. 2. FL plans are not specialized to training, but can also encode evaluation tasks. 
+
+For other details, such as multi-tenancy and attestation, please refer to the paper. 
 
 <p align="center">
-    <img src="http://xzhu27.me/fds/hash.png" alt="image"/>
+    <img src="http://xzhu27.me/eecs598_summaries/server.png" alt="image"/>
 </p>
 
-Different from inode in UNIX, the TLT does not contain complete information about the location of individual tracts in the system.(We will compare TLT against DHT and NameNode in Hadoop later). The metadata about each blob is stored in its special metadata tract("tract - 1"). 
+#### Server
 
-Note that TLT changes only in response to cluster reconfiguration or failures and is not modified by tract reads and writes. Thus, TLT entries can be cache by clients for a long time. 
+The FL server is designed around the Actor Programming model. The main actors include:
 
-#### Dynamic Work Allocation
+* **Coordinators** are Top-level actors(one per population) which enable global synchronization and advancing rounds in lockstep. As previously mentioned, The Coordinator receives information about how many devices are connected to each Selector and instructs them how many devices to accept for participation, based on which FL tasks are scheduled.
 
-In FDS, since storage and compute are no longer colocated, the assignment of work to worker can be done dynamically, at fine granularity, during task execution. The best practice for FDS applications is to centrally (or, at large scale, hierarchically) give small units of work to each worker as it nears completion of its previous unit. Since,  in BSP, all tasks in the previous stage have to finish before the current stages begin, such design eliminates stragglers. 
+* **Selectors** are responsible for accepting and forwarding device connections. After the Master Aggregator and set of Aggregators are spawned, the Coordinator instructs the Selectors to forward a subset of its connected devices to the Aggregators, allowing the Coordinator to efficiently allocate devices to FL tasks regardless of how many devices are available
 
-#### Replication
+* **Master Aggregators** manage the rounds of each FL task. In order to scale with the number of devices and update size, they make dynamic decisions to spawn one or more Aggregators to which work is delegated.
 
-FDS uses replication both for availability and fault tolerance. When an application writes a tract, the client library finds the appropriate row of the TLT and sends write to every tractserver it contains. Reads select a single tractserver at random. When a tract server receives create, extend or delete blob requests(i.e. operations which modify the metadata tract), it executes a two-phase commit with the other replicas. 
+#### Federated Averaging
 
-#### Recovery
+**FedAvg** is a variation of traditional Stochastic gradient descent(SGD) algorithm, which combines local SGD on each client with a server that performs model averaging. 
 
-Each TLT entry also has a version number, canonically assigned by the metadata server. When the metadata server detects a tractserver timeout, it declares the tractserver dead. Then, it invalidates the current TLT by incrementing the version number of each row in which the failed tractserver appears and picks random tractservers to fill in the empty spaces. Table versioning prevents a tractserver that failed and then returned. The paper provides more details and examples about the recovery protocol. 
+At the beginning of each round, a random fraction C of clients is selected, and the server sends the current global algorithm state to each of these clients (e.g., the current model parameters). We only select a fraction of clients for efficiency, as the experiments show diminishing returns for adding more clients beyond a certain point. Each selected client then performs local computation based on the global state and its local dataset, and sends an update to the server. The server then applies these updates to its global state, and the process repeats.
 
+<p align="center">
+    <img src="http://xzhu27.me/eecs598_summaries/fedavg.png" alt="image"/>
+</p>
 
-## Compare to HDFS/GFS
+The amount of computation is controlled by three key parameters: C, the fraction of clients that perform computation on each round; E, the number of training passes each client makes over its local dataset on each round; and B, the local minibatch size used for the client updates.
 
-Hadoop and GFS both have a centralized master that keeps all metadata in memory. Files and directories are represented on the master/NameNode by inodes, which record attributes like permissions, modification and access times, namespace and disk space quotas. Although such design provides one-hop access to the data and can recover from failure promptly, as the contents of the store grow, the master becomes a centralized scaling and performance bottleneck. 
-In contrast, the tract locator table's size is determined by the number of machines in a cluster, rather than the size of its content.
+However, the paper does not provide any theoretical convergence guarantee and the experiments were not conducted in a network setting.
 
-(Figure 1 credits to Mosharaf Chowdhury and Figure 2,3 credit to Alex Rasmussen)
+## Comparison between Parameter Server and FL: 
+Federated Learning protocol is very similar to the traditional parameter server protocol. The main differences are: 
+
+* In data center setting, shared storage is usually used, which means the worker machine do not keep persistent data storage on their own, and they fetch data from the shared storage at the beginning of each iteration.
+* In FL, the data, and thus the loss function, on the different clients may be very heterogeneous, and far from being representative of the joint data.(e.g. the data stored on each client may be highly non-IID)
+* In FL, the server never keeps track of any individual client information and only uses aggregates to ensure privacy.
+ Because of the high churn in FL setting, only a small subset of the devices are selected by the server in each round.
+ 
+ ## Applications
+ 
+In general, FL is most appropriate when:
+
+* On-device data is more relevant than server-side proxy data
+* On-device data is privacy sensitive or large 
+* Labels can be inferred naturally from user interaction
+
+## Advantages
+
+* Highly efficient use of network bandwidth: Less information is required to be transmitted to the cloud.
+* Privacy: As described above, the raw data of users need not be sent to the cloud. With guaranteed privacy, more users will be willing to take part in collaborative model training and so, better inference models are built.
+
+## Challenges and Limitations
+
+* Does it work? And if so, why? 
+  *We can prove FL works for linear models and a couple of other special cases, but we cannot prove it works for more complicated things like neural networks unless we train the model in a non-federated way and demonstrate that it gets almost the same performance. 
+
+* Security
+  * Recent study shows that a malicious participant may exist in FL and can infer the information of other participants from shared parameters. As such, privacy and security issues in FL need to be considered.  
+ 
+* Statistical and System heterogeneity
+  * In a large and complex mobile edge network, the heterogeneity of participating devices in terms of data quality, computation power, and willingness to participate have to be well managed from the resource allocation perspective.
+
+* Slow, unstable and limited communication
+  * Due to the high dimensionality of model updates and limited communication bandwidth of participating mobile devices, communication costs remain an issue.
+  * One potential mitigation is that we can select N devices in each round and proceed with K response(K <= N). 
+  
+# Summary of "Towards Federated Learning at Scale: System Design"
+
+## Problem and Motivation
+
+The scenarios that motivate FilterForward include remote “Internet of Things” monitoring and “smart city” deployments of tens or hundreds of thousands of wide-angle, fixed-view cameras. However, there are a number of challenges: 
+
+* **Limited Bandwidth**: Each camera in large-scale deployments may only have few hundred kbp, while each stream coming in may be several orders of magnitude greater than our available uplink bandwidth. This bandwidth gap, exacerbated by the requirement for high-quality data, necessitates an edge-based decision about which frames to send to the datacenter
+* **Scalable Multi-tenancy**: In real-world deployments, cameras observe scenes containing diverse objects and activities. Different applications are simultaneously interested in all of this information, and more. Given edge nodes’ limited compute resources, scaling to multiple applications naturally poses a performance challenge. 
+
+## Solution Overview 
+
+To address the above challenges, FilterForward uses a feature extractor and microclassifier to provide highly accurate, multi-tenant video filtering for bandwidth-constrained edge nodes. 
+
+<p align="center">
+    <img src="http://xzhu27.me/eecs598_summaries/ff.png" alt="image"/>
+</p>
+
+#### Feature Extractor
+In FF, microclassifiers reuse computation by taking as input feature maps produced from the intermediate results (activations) of a single reference DNN, called base DNN. The component that evaluates the base DNN and produces feature maps is called the feature extractor. As prior work observes, activations capture information that humans intuitively desire to extract from images, such as the presence and number of objects in a scene, and outperform handcrafted low-level features.
+
+Although feature extraction is computationally intensive phase, its results are reused by all of the MCs, amortizing the per-frame, upfront overhead once the number of MCs passes a break-even point.
+
+#### Microclassifier
+
+Microclassifiers are lightweight binary classification neural networks that take as input feature maps extracted by the base DNN and output the probability that a frame is relevant to a particular application. 
+Choosing which base DNN layer to use as input to each microclassifier is critical to their accuracies. Too late a layer may not be able to observe small details (because they have been subsumed by global semantic classification). Too early a layer could be computationally expensive due to the large size of early layer activations and the amount of processing still required to transform low-level features into a classification. The authors discuss some microclassifier architectures in the paper. 
