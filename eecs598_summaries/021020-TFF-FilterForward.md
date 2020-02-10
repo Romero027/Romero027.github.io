@@ -97,7 +97,26 @@ In general, FL is most appropriate when:
   * Due to the high dimensionality of model updates and limited communication bandwidth of participating mobile devices, communication costs remain an issue.
   * One potential mitigation is that we can select N devices in each round and proceed with K response(K <= N). 
   
-# Summary of "Towards Federated Learning at Scale: System Design"
+## Summary of Class Discussion 
+ 
+#### How to reduce the communication cost between the server and the clients?
+
+One popular way of reducing the communication bandwidth of federated learning is compression. There are several different compression objectives of practical value. 
+
+* Gradient compression: reduce the size of the model updates communicated from clients to server
+* Model broadcast compression: reduce the size of the model broadcast from server to clients
+
+In general, gradient compression is more promising than model broadcast compression because edge devices' connections generally have slower upload than download bandwidth.
+
+However, one caveat of compression is its compatibility with differential privacy and secure aggregation. Many algorithms used in FL such as Secure Aggregation and differential privacy are not designed to work with compressed or quantized communications.
+  
+#### Is global FL-trained models always better than local models?
+
+In a setting that the size of local datasets are in the same ballpark and the data is IID, FL clearly has an edge. However, given that in real-world, the data is almost always Non-IID, local models might do much better than the global model. Thus, finding under what conditions the global model is better than the local modes is an interesting question.
+
+I think one promising way is to begin with federated learning of a single global model and, before the model is used to make render predictions, the model is personalized by additional training on the local held-out dataset.
+
+# Summary of "Scaling Video Analytics on Constrained Edge Nodes"
 
 ## Problem and Motivation
 
@@ -123,3 +142,13 @@ Although feature extraction is computationally intensive phase, its results are 
 
 Microclassifiers are lightweight binary classification neural networks that take as input feature maps extracted by the base DNN and output the probability that a frame is relevant to a particular application. 
 Choosing which base DNN layer to use as input to each microclassifier is critical to their accuracies. Too late a layer may not be able to observe small details (because they have been subsumed by global semantic classification). Too early a layer could be computationally expensive due to the large size of early layer activations and the amount of processing still required to transform low-level features into a classification. The authors discuss some microclassifier architectures in the paper. 
+
+
+## Summary of Class Discussion
+
+#### Does FilterForward requires cameras to have computational power?
+
+Not necessarily. The paper assumes the cameras are connected to some local compute nodes. 
+
+However, there are cameras empowered with more on-board compute resource, such as[AWS deeplens](https://aws.amazon.com/deeplens/), and can run complex deep learning models
+locally. 
