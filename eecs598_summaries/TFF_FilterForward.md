@@ -15,9 +15,12 @@ The goal is to build a system that can train a deep neural network on data store
 #### Device-server protocol
 
 Each round of the protocol contains three phases. 
-**Selection**: The server(i.e. the coordinator in the server) picks a subset of available devices to work on a specific FL task. 
-**Configuration**: The server sends the FL plan(execution plan) and the FL checkpoint(i.e. a serialized state of a Tensorflow session) with the global model to each of the chosen devices. When receiving a FL task, the FL runtime will be responsible for performing local training.
-**Reporting**: The server waits for the participating devices to report updates. The round is considered successful if enough devices report in time. (The update to the model is often sent to the server using encrypted communication.)
+
+1. **Selection**: The server(i.e. the coordinator in the server) picks a subset of available devices to work on a specific FL task. 
+
+2. **Configuration**: The server sends the FL plan(execution plan) and the FL checkpoint(i.e. a serialized state of a Tensorflow session) with the global model to each of the chosen devices. When receiving a FL task, the FL runtime will be responsible for performing local training.
+
+3. **Reporting**: The server waits for the participating devices to report updates. The round is considered successful if enough devices report in time. (The update to the model is often sent to the server using encrypted communication.)
 
 As an analogy, we can interpret the FL server as the reducer, and FL devices as mappers. 
 
@@ -41,9 +44,11 @@ For other details, such as multi-tenancy and attestation, please refer to the pa
 
 The FL server is designed around the Actor Programming model. The main actors include:
 
-**Coordinators** are Top-level actors(one per population) which enable global synchronization and advancing rounds in lockstep. As previously mentioned, The Coordinator receives information about how many devices are connected to each Selector and instructs them how many devices to accept for participation, based on which FL tasks are scheduled.
-**Selectors** are responsible for accepting and forwarding device connections. After the Master Aggregator and set of Aggregators are spawned, the Coordinator instructs the Selectors to forward a subset of its connected devices to the Aggregators, allowing the Coordinator to efficiently allocate devices to FL tasks regardless of how many devices are available
-**Master Aggregators** manage the rounds of each FL task. In order to scale with the number of devices and update size, they make dynamic decisions to spawn one or more Aggregators to which work is delegated.
+⋅⋅* **Coordinators** are Top-level actors(one per population) which enable global synchronization and advancing rounds in lockstep. As previously mentioned, The Coordinator receives information about how many devices are connected to each Selector and instructs them how many devices to accept for participation, based on which FL tasks are scheduled.
+
+⋅⋅* **Selectors** are responsible for accepting and forwarding device connections. After the Master Aggregator and set of Aggregators are spawned, the Coordinator instructs the Selectors to forward a subset of its connected devices to the Aggregators, allowing the Coordinator to efficiently allocate devices to FL tasks regardless of how many devices are available
+
+⋅⋅* **Master Aggregators** manage the rounds of each FL task. In order to scale with the number of devices and update size, they make dynamic decisions to spawn one or more Aggregators to which work is delegated.
 
 #### Federated Averaging
 
