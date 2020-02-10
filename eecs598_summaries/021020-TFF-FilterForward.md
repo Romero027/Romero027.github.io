@@ -110,11 +110,11 @@ In general, gradient compression is more promising than model broadcast compress
 
 However, one caveat of compression is its compatibility with differential privacy and secure aggregation. Many algorithms used in FL such as Secure Aggregation and differential privacy are not designed to work with compressed or quantized communications.
   
-#### Is global FL-trained models always better than local models?
+#### are global FL-trained models always better than local models?
 
 In a setting that the size of local datasets are in the same ballpark and the data is IID, FL clearly has an edge. However, given that in real-world, the data is almost always Non-IID, local models might do much better than the global model. Thus, finding under what conditions the global model is better than the local modes is an interesting question.
 
-I think one promising way is to begin with federated learning of a single global model and, before the model is used to make render predictions, the model is personalized by additional training on the local held-out dataset.
+I think one promising way is to begin with federated learning of a single global model and, before the model is used to render predictions, the model is personalized by additional training on the local held-out dataset.
 
 # Summary of "Scaling Video Analytics on Constrained Edge Nodes"
 
@@ -146,9 +146,9 @@ Choosing which base DNN layer to use as input to each microclassifier is critica
 
 ## Summary of Class Discussion
 
-#### Does FilterForward requires cameras to have computational power?
+#### Does FilterForward require cameras to have computational power?
 
 Not necessarily. The paper assumes the cameras are connected to some local compute nodes. 
 
-However, there are cameras empowered with more on-board compute resource, such as[AWS deeplens](https://aws.amazon.com/deeplens/), and can run complex deep learning models
+However, there are cameras empowered with more onboard compute resource, such as[AWS deeplens](https://aws.amazon.com/deeplens/), and can run complex deep learning models
 locally. 
