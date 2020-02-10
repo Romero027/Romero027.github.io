@@ -89,13 +89,10 @@ In general, FL is most appropriate when:
 
 * Does it work? And if so, why? 
   *We can prove FL works for linear models and a couple of other special cases, but we cannot prove it works for more complicated things like neural networks unless we train the model in a non-federated way and demonstrate that it gets almost the same performance. 
-
 * Security
   * Recent study shows that a malicious participant may exist in FL and can infer the information of other participants from shared parameters. As such, privacy and security issues in FL need to be considered.  
- 
 * Statistical and System heterogeneity
   * In a large and complex mobile edge network, the heterogeneity of participating devices in terms of data quality, computation power, and willingness to participate have to be well managed from the resource allocation perspective.
-
 * Slow, unstable and limited communication
   * Due to the high dimensionality of model updates and limited communication bandwidth of participating mobile devices, communication costs remain an issue.
   * One potential mitigation is that we can select N devices in each round and proceed with K response(K <= N). 
