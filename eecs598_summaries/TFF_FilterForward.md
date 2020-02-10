@@ -88,6 +88,41 @@ In general, FL is most appropriate when:
 ## Challenges and Limitations
 
 * Does it work? And if so, why? 
-* Fruit
-  * Apple
-...We can prove FL works for linear models and a couple of other special cases, but we cannot prove it works for more complicated things like neural networks unless we train the model in a non-federated way and demonstrate that it gets almost the same performance. 
+  *We can prove FL works for linear models and a couple of other special cases, but we cannot prove it works for more complicated things like neural networks unless we train the model in a non-federated way and demonstrate that it gets almost the same performance. 
+
+* Security
+  * Recent study shows that a malicious participant may exist in FL and can infer the information of other participants from shared parameters. As such, privacy and security issues in FL need to be considered.  
+ 
+* Statistical and System heterogeneity
+  * In a large and complex mobile edge network, the heterogeneity of participating devices in terms of data quality, computation power, and willingness to participate have to be well managed from the resource allocation perspective.
+
+* Slow, unstable and limited communication
+  * Due to the high dimensionality of model updates and limited communication bandwidth of participating mobile devices, communication costs remain an issue.
+  * One potential mitigation is that we can select N devices in each round and proceed with K response(K <= N). 
+  
+# Summary of "Towards Federated Learning at Scale: System Design"
+
+## Problem and Motivation
+
+The scenarios that motivate FilterForward include remote “Internet of Things” monitoring and “smart city” deployments of tens or hundreds of thousands of wide-angle, fixed-view cameras. However, there are a number of challenges: 
+
+* **Limited Bandwidth**: Each camera in large-scale deployments may only have few hundred kbp, while each stream coming in may be several orders of magnitude greater than our available uplink bandwidth. This bandwidth gap, exacerbated by the requirement for high-quality data, necessitates an edge-based decision about which frames to send to the datacenter
+* **Scalable Multi-tenancy**: In real-world deployments, cameras observe scenes containing diverse objects and activities. Different applications are simultaneously interested in all of this information, and more. Given edge nodes’ limited compute resources, scaling to multiple applications naturally poses a performance challenge. 
+
+## Solution Overview 
+
+To address the above challenges, FilterForward uses a feature extractor and microclassifier to provide highly accurate, multi-tenant video filtering for bandwidth-constrained edge nodes. 
+
+<p align="center">
+    <img src="http://xzhu27.me/eecs598_summaries/ff.png" alt="image"/>
+</p>
+
+#### Feature Extractor
+In FF, microclassifiers reuse computation by taking as input feature maps produced from the intermediate results (activations) of a single reference DNN, called base DNN. The component that evaluates the base DNN and produces feature maps is called the feature extractor. As prior work observes, activations capture information that humans intuitively desire to extract from images, such as the presence and number of objects in a scene, and outperform handcrafted low-level features.
+
+Although feature extraction is computationally intensive phase, its results are reused by all of the MCs, amortizing the per-frame, upfront overhead once the number of MCs passes a break-even point.
+
+#### Microclassifier
+
+Microclassifiers are lightweight binary classification neural networks that take as input feature maps extracted by the base DNN and output the probability that a frame is relevant to a particular application. 
+Choosing which base DNN layer to use as input to each microclassifier is critical to their accuracies. Too late a layer may not be able to observe small details (because they have been subsumed by global semantic classification). Too early a layer could be computationally expensive due to the large size of early layer activations and the amount of processing still required to transform low-level features into a classification. The authors discuss some microclassifier architectures in the paper. 
