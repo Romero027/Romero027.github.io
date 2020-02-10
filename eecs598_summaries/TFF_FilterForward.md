@@ -83,6 +83,6 @@ In general, FL is most appropriate when:
 ## Advantages
 
 * Highly efficient use of network bandwidth
-... * Less information is required to be transmitted to the cloud.
+...* Less information is required to be transmitted to the cloud.
 * Privacy
-... * As described above, the raw data of users need not be sent to the cloud. With guaranteed privacy, more users will be willing to take part in collaborative model training and so, better inference models are built.
+...* As described above, the raw data of users need not be sent to the cloud. With guaranteed privacy, more users will be willing to take part in collaborative model training and so, better inference models are built.
