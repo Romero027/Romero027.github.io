@@ -9,7 +9,7 @@ Switch ports and cabling have both monetary cost and an operational cost in data
 The following figure shows the dominant design pattern for data-center architecture today(2012). 
 
 <p align="center">
-    <img src="http://xzhu27.me/fds/clos.png" alt="image"/>
+    <img src="http://xzhu27.me/eecs598_summaries/clos.png" alt="image"/>
 </p>
 
 As shown in the above figure, the network is a tree-like hierarchy reaching from a layer of servers in racks at the bottom to a layer of core routers at the top. Orange rectangles represent switches. Unfortunately, this conventional design suffers from a fundamental limitation: **Limited server-to-server capacity(i.e., oversubscription).**
@@ -32,19 +32,19 @@ Another consequence of such design is that high disk-to-disk bandwidth can also 
 In FDS, data is logically stored in **blobs**, which is a byte sequence named with a 128-bit GUID. Reads from and writes to a blob are done in units called **tracts**. Empirically, they found that 8MB makes random and sequential access achieves nearly the same throughput. Every disk is managed by a process called a **tract server** that services read and write requests that arrive over the network from clients. FDS uses a **metadata server** to store the location of tracts.
 
 <p align="center">
-    <img src="http://xzhu27.me/fds/architecture.png" alt="image"/>
+    <img src="http://xzhu27.me/fds/eecs598_summaries.png" alt="image"/>
 </p>
 
 #### Metadata Management
 
 <p align="center">
-    <img src="http://xzhu27.me/fds/table.png" alt="image"/>
+    <img src="http://xzhu27.me/fds/eecs598_summaries.png" alt="image"/>
 </p>
 
 FDS uses a metadata server to store the information about data placement, but it only stores the tract locator table(TLT). Each TLT entry, with k-way replication, contains k tractservers. The client applies the following function to get entries in TLT, called **tract locator**. Once clients find the proper tractserver address in the TLT, they send read and write requests containing the blob GUID, tract number. 
 
 <p align="center">
-    <img src="http://xzhu27.me/fds/hash.png" alt="image"/>
+    <img src="http://xzhu27.me/fds/eecs598_summaries.png" alt="image"/>
 </p>
 
 Different from inode in UNIX, the TLT does not contain complete information about the location of individual tracts in the system.(We will compare TLT against DHT and NameNode in Hadoop later). The metadata about each blob is stored in its special metadata tract("tract - 1"). 
