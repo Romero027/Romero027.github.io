@@ -89,6 +89,7 @@ In general, FL is most appropriate when:
 
 * Does it work? And if so, why? 
   *We can prove FL works for linear models and a couple of other special cases, but we cannot prove it works for more complicated things like neural networks unless we train the model in a non-federated way and demonstrate that it gets almost the same performance. 
+  
 * Security
   * Recent study shows that a malicious participant may exist in FL and can infer the information of other participants from shared parameters. As such, privacy and security issues in FL need to be considered.  
 * Statistical and System heterogeneity
