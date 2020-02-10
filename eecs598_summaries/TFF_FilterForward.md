@@ -1,33 +1,20 @@
-# Summary of "Flat Datacenter Storage"
-Xiangfeng Zhu(zxfeng)
+# Summary of "Towards Federated Learning at Scale: System Design"
+Xiangfeng Zhu(zxfeng), Jiachen Liu(amberljc), Chris Chen(zhezheng)
 
 ## Problem and Motivation
 
-#### Oversubscription
-Switch ports and cabling have both monetary cost and an operational cost in data centers. Imagine you have to wire thousands of machines together. How would you do it? 
+The goal is to build a system that can train a deep neural network on data stored on the phone which will never leave the device. The weights are combine in the cloud with Federated Averaging, constructing a global model which is pushed back to the phone for inference.
 
-The following figure shows the dominant design pattern for data-center architecture today(2012). 
-
-<p align="center">
-    <img src="http://xzhu27.me/fds/clos.png" alt="image"/>
-</p>
-
-As shown in the above figure, the network is a tree-like hierarchy reaching from a layer of servers in racks at the bottom to a layer of core routers at the top. Orange rectangles represent switches. Unfortunately, this conventional design suffers from a fundamental limitation: **Limited server-to-server capacity(i.e., oversubscription).**
-
-As we go up the hierarchy, we are confronted with steep technical and financial barriers in sustaining high bandwidth. Thus, as traffic moves up through the layers of switches and routers, the over-subscription ratio increases rapidly. Top-level switches can be oversubscribed by up to 240x(according to the VL2 paper), meaning that only one in 240 machines can send data across the top level to the other side at a time. 
-
-The [VL2 paper](http://web.eecs.umich.edu/~mosharaf/Readings/VL2.pdf) provides a more detailed explanation. 
-
-#### Disk Locality
-The conventional wisdom in big-data processing systems(e.g., MapReduce) is to move computation to the data(i.e., respect data locality) because of the problem of oversubscription. Although there are some works(e.g., [Delay Scheduling](http://elmeleegy.com/khaled/papers/delay_scheduling.pdf)) attempted to solve this issue, location-awareness adds complexity to the scheduler. 
-
-
-#### CLOS network 
-However, recently developed [CLOS networks](http://web.eecs.umich.edu/~mosharaf/Readings/VL2.pdf) have made it economical to build non-oversubscribed full bisection bandwidth networks at the scale of a datacenter. 
-The main consequence is that there is no distinction between local disk and remote disk, since the network bandwidth is roughly equal to the network bandwidth. (However, note that memory bandwidth is still two orders of magnitude than the disk and network bandwidth). Thus, we can have much simpler work schedulers and programming models. 
-Another consequence of such design is that high disk-to-disk bandwidth can also facilitate fast recovery from disk and machine failures. 
 
 ## Solution Overview
+
+### Device-server protocol
+
+Each round of the protocol contains three phases. 
+**Selection**: The server(i.e. the coordinator in the server) picks a subset of available devices to work on a specific FL task[1]. 
+**Configuration**: The server sends the FL plan(execution plan) and the FL checkpoint(i.e. a serialized state of a Tensorflow session) with the global model to each of the chosen devices. When receiving a FL task, the FL runtime will be responsible for performing local training.
+**Reporting**: The server waits for the participating devices to report updates. The round is considered successful if enough devices report in time. (The update to the model is often sent to the server using encrypted communication.)
+As an analogy, we can interpret the FL server as the reducer, and FL devices as mappers. 
 
 In FDS, data is logically stored in **blobs**, which is a byte sequence named with a 128-bit GUID. Reads from and writes to a blob are done in units called **tracts**. Empirically, they found that 8MB makes random and sequential access achieves nearly the same throughput. Every disk is managed by a process called a **tract server** that services read and write requests that arrive over the network from clients. FDS uses a **metadata server** to store the location of tracts.
 
