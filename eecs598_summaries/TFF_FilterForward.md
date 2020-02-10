@@ -88,4 +88,6 @@ In general, FL is most appropriate when:
 ## Challenges and Limitations
 
 * Does it work? And if so, why? 
+* Fruit
+  * Apple
 ...We can prove FL works for linear models and a couple of other special cases, but we cannot prove it works for more complicated things like neural networks unless we train the model in a non-federated way and demonstrate that it gets almost the same performance. 
