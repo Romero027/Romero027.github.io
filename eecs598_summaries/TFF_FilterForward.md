@@ -52,7 +52,7 @@ The FL server is designed around the Actor Programming model. The main actors in
 
 #### Federated Averaging
 
-**FederatedAveraging** is a variation of traditional Stochastic gradient descent(SGD) algorithm, which combines local SGD on each client with a server that performs model averaging. 
+**FedAvg** is a variation of traditional Stochastic gradient descent(SGD) algorithm, which combines local SGD on each client with a server that performs model averaging. 
 
 At the beginning of each round, a random fraction C of clients is selected, and the server sends the current global algorithm state to each of these clients (e.g., the current model parameters). We only select a fraction of clients for efficiency, as the experiments show diminishing returns for adding more clients beyond a certain point. Each selected client then performs local computation based on the global state and its local dataset, and sends an update to the server. The server then applies these updates to its global state, and the process repeats.
 
@@ -65,12 +65,19 @@ The amount of computation is controlled by three key parameters: C, the fraction
 However, the paper does not provide any theoretical convergence guarantee and the experiments were not conducted in a network setting.
 
 ## Comparison between Parameter Server and FL: 
-Federated Learning protocol is very similar to the traditional parameter server protocol. The differences are: 
-In data center setting, shared storage is usually used, which means the worker machine do not keep persistent data storage on their own, and they fetch data from the shared storage at the beginning of each iteration.
- In FL, the data, and thus the loss function, on the different clients may be very heterogeneous, and far from being representative of the joint data.(e.g. the data stored on each client may be highly non-IID)
- In FL, the server never keeps track of any individual client information and only uses aggregates to ensure privacy.
+Federated Learning protocol is very similar to the traditional parameter server protocol. The main differences are: 
+
+* In data center setting, shared storage is usually used, which means the worker machine do not keep persistent data storage on their own, and they fetch data from the shared storage at the beginning of each iteration.
+
+* In FL, the data, and thus the loss function, on the different clients may be very heterogeneous, and far from being representative of the joint data.(e.g. the data stored on each client may be highly non-IID)
+
+* In FL, the server never keeps track of any individual client information and only uses aggregates to ensure privacy.
  Because of the high churn in FL setting, only a small subset of the devices are selected by the server in each round.
  
  ## Applications
  
- 
+In general, FL is most appropriate when:
+
+* On-device data is more relevant than server-side proxy data
+* On-device data is privacy sensitive or large 
+* Labels can be inferred naturally from user interaction
