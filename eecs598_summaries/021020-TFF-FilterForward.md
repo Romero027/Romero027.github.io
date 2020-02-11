@@ -143,6 +143,11 @@ Although feature extraction is computationally intensive phase, its results are 
 Microclassifiers are lightweight binary classification neural networks that take as input feature maps extracted by the base DNN and output the probability that a frame is relevant to a particular application. 
 Choosing which base DNN layer to use as input to each microclassifier is critical to their accuracies. Too late a layer may not be able to observe small details (because they have been subsumed by global semantic classification). Too early a layer could be computationally expensive due to the large size of early layer activations and the amount of processing still required to transform low-level features into a classification. The authors discuss some microclassifier architectures in the paper. 
 
+## Advantages
+
+* **Edge-to-cloud design**: this hybrid design provides a way to satisfy the need to retrive high-fidelity data from bandwidth-limited edge nodes.
+
+* **Shared feature extractors + lightweight classifiers**: this two-level design allows scalable multi-tenant ML task executions in compute-constrained settings.
 
 ## Summary of Class Discussion
 
