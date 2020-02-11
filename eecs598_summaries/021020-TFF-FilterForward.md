@@ -110,7 +110,7 @@ In general, gradient compression is more promising than model broadcast compress
 
 However, one caveat of compression is its compatibility with differential privacy and secure aggregation. Many algorithms used in FL such as Secure Aggregation and differential privacy are not designed to work with compressed or quantized communications.
   
-#### are global FL-trained models always better than local models?
+#### Are global FL-trained models always better than local models?
 
 In a setting that the size of local datasets are in the same ballpark and the data is IID, FL clearly has an edge. However, given that in real-world, the data is almost always Non-IID, local models might do much better than the global model. Thus, finding under what conditions the global model is better than the local modes is an interesting question.
 
