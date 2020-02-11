@@ -155,5 +155,5 @@ Choosing which base DNN layer to use as input to each microclassifier is critica
 
 Not necessarily. The paper assumes the cameras are connected to some local compute nodes. 
 
-However, there are cameras empowered with more onboard compute resource, such as[AWS deeplens](https://aws.amazon.com/deeplens/), and can run complex deep learning models
+However, there are cameras empowered with more onboard compute resource, such as [AWS deeplens](https://aws.amazon.com/deeplens/), and can run complex deep learning models
 locally. 
