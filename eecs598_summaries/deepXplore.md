@@ -55,8 +55,8 @@ To understand how DeepBase works, we need to clarify what are hypotheses and com
 
 Approaches for interpretation includes 
 
-..1. Manual Visual Inspection: Visualize each unit’s activations and let users manually check that the units behave as expected.
-..2. Saliency Analysis: Seek to identify the input symbols that have the largest “effect” on a single or group of units.
+1. Manual Visual Inspection: Visualize each unit’s activations and let users manually check that the units behave as expected.
+2. Saliency Analysis: Seek to identify the input symbols that have the largest “effect” on a single or group of units.
 ..3. Statistical Analysis: Using annotated datasets to analyze groups of units.
 
 
@@ -65,12 +65,9 @@ Generally speaking, DeepBase is a system that provides a declarative abstraction
 
 On a system perspective, DeepBase proposes lots of optimization to speed up the DNI.
 
-..1.	Shared Computation: Put multiple measures/hypotheses into a single Keras computation graph and utilize Keras’s graph optimization
-..2.	Early stopping: Stop when the score has converged (error less than preset bound), Stop materializing more data when early stopped, streaming behavior extraction, extract & materialize behaviors in an online fashion
+1.Shared Computation: Put multiple measures/hypotheses into a single Keras computation graph and utilize Keras’s graph optimization
+2.Early stopping: Stop when the score has converged (error less than preset bound), Stop materializing more data when early stopped, streaming behavior extraction, extract & materialize behaviors in an online fashion
 
-<p align="center">
-    <img src="http://xzhu27.me/eecs598_summaries/deepbase.png" alt="image"/>
-</p>
 
 
 ## Limitations and Possible Improvements
