@@ -15,6 +15,7 @@ The key ideas of DeepXplore are the concept of **neuron coverage** for measuring
 </p>
 
 DeepXplore takes unlabeled test input as seeds and generates new tests. While generating tests, DeepXplore tries to maximize both neuron coverage and the chances of tests that cause the DNN models to behave differently(i.e., output different labels). Both goals are necessary for thorough testing that exposes erroneous corner cases. 
+
 DeepXplore solves the above joint optimization problem for neuron coverage and differential behavior maximization using gradient ascent. 
 
 ## Limitations
@@ -45,9 +46,8 @@ There is increasing need about when and why deep learning models work, i.e. the 
 ## Hypothesis
 
 Deep neural inspection(DNI) analyses primarily use statistical measures to quantify the affinity between hidden unit behaviors and hypotheses, and simply differ in the specific NN models, hypotheses, or types of hidden unit behaviors that are studied. 
+
 DeepBase is able to quickly compute the affinity score between each (hidden units group, hypothesis) pair, given groups of hidden units, hypotheses, and statistical affinity measures.
-
-
 
 ## Solution Overview
 
@@ -57,7 +57,7 @@ Approaches for interpretation includes
 
 1. Manual Visual Inspection: Visualize each unit’s activations and let users manually check that the units behave as expected.
 2. Saliency Analysis: Seek to identify the input symbols that have the largest “effect” on a single or group of units.
-..3. Statistical Analysis: Using annotated datasets to analyze groups of units.
+3. Statistical Analysis: Using annotated datasets to analyze groups of units.
 
 
 Generally speaking, DeepBase is a system that provides a declarative abstraction to efficiently express and execute these analyses. DeepBase takes as input a test set, a trained model, a set of Python functions that encode hypotheses of what the model may be learning, and a scoring function, e.g., a measure of statistical dependency. From those inputs, DeepBase generates behaviors for each unit/hypothesis and use GPU to extract unit activations. Then, DeepBase outputs a set of scores that quantify the affinity between the hypotheses and the model’s hidden units. 
@@ -66,6 +66,7 @@ Generally speaking, DeepBase is a system that provides a declarative abstraction
 On a system perspective, DeepBase proposes lots of optimization to speed up the DNI.
 
 1.Shared Computation: Put multiple measures/hypotheses into a single Keras computation graph and utilize Keras’s graph optimization
+
 2.Early stopping: Stop when the score has converged (error less than preset bound), Stop materializing more data when early stopped, streaming behavior extraction, extract & materialize behaviors in an online fashion
 
 
@@ -89,9 +90,9 @@ DeepBase can use hypotheses to replace part to unit to speed up, which could be 
 
 #### Given such large search space, how does deep base make inspection scalable?
 
-Algorithm perspective: Consider choices of units, scores, etc… as hyperparameters and perform local search.
+*Algorithm perspective: Consider choices of units, scores, etc… as hyperparameters and perform local search.
 
-System perspective: Affinity scores are computed pairwise, can be run in the distributed fashion.
+*System perspective: Affinity scores are computed pairwise, can be run in the distributed fashion.
 
 
 
