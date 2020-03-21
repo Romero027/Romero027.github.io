@@ -65,9 +65,8 @@ Generally speaking, DeepBase is a system that provides a declarative abstraction
 
 On a system perspective, DeepBase proposes lots of optimization to speed up the DNI.
 
-1.Shared Computation: Put multiple measures/hypotheses into a single Keras computation graph and utilize Keras’s graph optimization
-
-2.Early stopping: Stop when the score has converged (error less than preset bound), Stop materializing more data when early stopped, streaming behavior extraction, extract & materialize behaviors in an online fashion
+1. Shared Computation: Put multiple measures/hypotheses into a single Keras computation graph and utilize Keras’s graph optimization
+2. Early stopping: Stop when the score has converged (error less than preset bound), Stop materializing more data when early stopped, streaming behavior extraction, extract & materialize behaviors in an online fashion
 
 
 
