@@ -14,6 +14,8 @@ The key ideas of DeepXplore are the concept of **neuron coverage** for measuring
     <img src="http://xzhu27.me/eecs598_summaries/deepXplore.png" alt="image"/>
 </p>
 
+DeepXplore takes unlabeled test input as seeds and generates new tests. While generating tests, DeepXplore tries to maximize both neuron coverage and the chances of tests that cause the DNN models to behave differently(i.e., output different labels). Both goals are necessary for thorough testing that exposes erroneous corner cases. 
+DeepXplore solves the above joint optimization problem for neuron coverage and differential behavior maximization using gradient ascent. 
 
 ## Limitations
 
