@@ -75,11 +75,11 @@ To address the aforementioned problems, this paper proposes Gandiva, a cluster s
 
 ## Summary of Class Discussion
 
-1. For time-slicing strategy of Gandiva, is it possible that small jobs will interrupt the jobs in cluster most of the time?
+#### For time-slicing strategy of Gandiva, is it possible that small jobs will interrupt the jobs in cluster most of the time?
 
 Yes, the long-running DLT jobs will be interrupted by the flow of incoming short jobs under time-slicing strategy. Therefore, some strategies have to be applied to avoid job starvation. One example might be:  when job's pending (waiting) time exceeds a threshold (which means the job has been waitting for too much time), it should have higher priorities or get more time slots in the time-slicing strategy.
 
 
-2. What kind of packing is Gandiva using?
+#### What kind of packing is Gandiva using?
 
 Common packing : run multiple DLT jobs on a GPU simultaneously and let the GPU time-share the jobs.
