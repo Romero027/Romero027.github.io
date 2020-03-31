@@ -32,7 +32,7 @@ Tiresias assumes the training jobs can only run on GPUs. Because CPUs have diffe
 
 
 
-### There is a paper in this year NSDI called Themis, which proposes another DL scheduler, but its objective is fairness rather than average JCT. Which objective makes more sense for DL jobs?
+#### There is a paper in this year NSDI called Themis, which proposes another DL scheduler, but its objective is fairness rather than average JCT. Which objective makes more sense for DL jobs?
 
 Tiresias assumes that jobs are executed in a private cluster. In general, in private clusters, it makes more sense to use JCT as the main objective, whereas, in shared clusters, fairness should be the primary goal.
 
