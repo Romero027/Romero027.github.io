@@ -1,36 +1,35 @@
-#!/usr/bin/env python3.7
-
-# Copyright 2020, Gurobi Optimization, LLC
-
-# Solve a model with different values of the Method parameter;
-# show which value gives the shortest solve time.
-
-import sys
 import gurobipy as gp
 from gurobipy import GRB
 
-if len(sys.argv) < 2:
-    print('Usage: lpmethod.py filename')
-    quit()
+try:
 
-# Read model
-m = gp.read(sys.argv[1])
+    # Create a new model
+    m = gp.Model("mip1")
 
-# Solve the model with different values of Method
-bestTime = m.Params.timeLimit
-bestMethod = -1
-for i in range(3):
-    m.reset()
-    m.Params.method = i
+    # Create variables
+    x = m.addVar(vtype=GRB.BINARY, name="x")
+    y = m.addVar(vtype=GRB.BINARY, name="y")
+    z = m.addVar(vtype=GRB.BINARY, name="z")
+
+    # Set objective
+    m.setObjective(x + y + 2 * z, GRB.MAXIMIZE)
+
+    # Add constraint: x + 2 y + 3 z <= 4
+    m.addConstr(x + 2 * y + 3 * z <= 4, "c0")
+
+    # Add constraint: x + y >= 1
+    m.addConstr(x + y >= 1, "c1")
+
+    # Optimize model
     m.optimize()
-    if m.status == GRB.OPTIMAL:
-        bestTime = m.Runtime
-        bestMethod = i
-        # Reduce the TimeLimit parameter to save time with other methods
-        m.Params.timeLimit = bestTime
 
-# Report which method was fastest
-if bestMethod == -1:
-    print('Unable to solve this model')
-else:
-    print('Solved in %g seconds with Method %d' % (bestTime, bestMethod))
+    for v in m.getVars():
+        print('%s %g' % (v.varName, v.x))
+
+    print('Obj: %g' % m.objVal)
+
+except gp.GurobiError as e:
+    print('Error code ' + str(e.errno) + ': ' + str(e))
+
+except AttributeError:
+    print('Encountered an attribute error')
