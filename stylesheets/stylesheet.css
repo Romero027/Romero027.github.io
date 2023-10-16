@@ -313,6 +313,15 @@ footer a:hover {
 }
 
 
+.bubble-box {
+  background-color: #315B96;
+  border-radius: 12px;
+  color: white;
+  padding: 0px 8px 0px 8px;
+  display: inline-block;
+  margin: 0;
+  font-size: 15px;
+}
 
 /* MISC */
 .clearfix:after {
