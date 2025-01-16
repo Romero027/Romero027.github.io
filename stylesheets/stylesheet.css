@@ -323,6 +323,32 @@ footer a:hover {
   font-size: 15px;
 }
 
+
+/* for climbinig images */
+.climbing-container {
+  display: flex; /* Align left and right sections side by side */
+  align-items: stretch; /* Align the top and bottom */
+  gap: 10px; /* Space between left and right */
+}
+.climbing-left-image, .climbing-right-images {
+  flex: 1; /* Equal width for both sections */
+}
+.climbing-left-image img {
+  width: 100%;
+  height: 100%; /* Stretch to match the right side's height */
+  object-fit: cover; /* Maintain aspect ratio while covering the full height */
+}
+.climbing-right-images {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.climbing-right-images img {
+  width: 100%;
+  height: 50%; /* Each image takes half the height of the right section */
+  object-fit: cover; /* Maintain aspect ratio */
+}
+
 /* MISC */
 .clearfix:after {
   clear: both;
