@@ -345,7 +345,7 @@ footer a:hover {
 }
 .climbing-right-images img {
   width: 100%;
-  height: 50%; /* Each image takes half the height of the right section */
+  height: 100%; /* Match the left image's height */
   object-fit: cover; /* Maintain aspect ratio */
 }
 
