@@ -93,12 +93,25 @@ header h2 {
 }
 
 .inner {
-  width: 800px;
+  max-width: 800px;
   margin: 0 auto;
+  padding: 0 16px;
+  box-sizing: border-box;
 }
 
 #container .inner img {
   max-width: 100%;
+}
+
+.headshot {
+  padding-top: 54px;
+  float: right;
+  margin: 0 0 0 20px;
+  max-width: 30%;
+}
+.headshot img {
+  width: 217px;
+  height: auto;
 }
 
 ul, ol, dl {
@@ -268,6 +281,11 @@ footer a:hover {
   gap: 10px; /* Space between left and right */
   max-width: 70%; /* Make the overall bouldering image area smaller */
 }
+@media only screen and (max-width: 600px) {
+  .climbing-container {
+    max-width: 100%;
+  }
+}
 .climbing-left-image, .climbing-right-images {
   flex: 1; /* Equal width for both sections */
 }
@@ -309,8 +327,23 @@ footer a:hover {
     padding-top: 10px;
     padding-bottom: 10px;
   }
-  .inner {
-    width: 94%;
-    margin: 0 auto;
+  header h1 {
+    font-size: 36px;
+  }
+  .headshot {
+    float: none;
+    max-width: none;
+    margin: 0 auto 16px;
+    padding-top: 20px;
+    text-align: center;
+  }
+  .headshot img {
+    width: 160px;
+  }
+  .date-at-right {
+    float: none;
+    display: block;
+    color: #777;
+    font-size: 0.9em;
   }
 }
