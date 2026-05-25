@@ -110,7 +110,7 @@ header h2 {
   max-width: 30%;
 }
 .headshot img {
-  width: 217px;
+  width: 180px;
   height: auto;
 }
 
@@ -338,7 +338,7 @@ footer a:hover {
     text-align: center;
   }
   .headshot img {
-    width: 160px;
+    width: 140px;
   }
   .date-at-right {
     float: none;
